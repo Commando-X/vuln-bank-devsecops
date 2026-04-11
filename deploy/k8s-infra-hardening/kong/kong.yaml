@@ -1,0 +1,51 @@
+_format_version: "3.0"
+
+services:
+  - name: vuln-bank-service
+    url: http://vuln-bank-svc.vuln-bank.svc.cluster.local:5000
+    connect_timeout: 10000
+    read_timeout: 30000
+    write_timeout: 30000
+
+    routes:
+      - name: allow-all-route
+        paths: ["/"]
+        strip_path: false
+        plugins:
+          - name: request-size-limiting
+            config:
+              allowed_payload_size: 1  
+
+      - name: api-public-route
+        paths: ["/api/v1/auth", "/api/v1/register", "/api/v3/forgot-password", "/api/v3/reset-password"]
+        strip_path: false
+        plugins:
+          - name: rate-limiting
+            config:
+              minute: 20
+              policy: local
+
+      - name: blocked-internal-route
+        paths: ["/internal", "/api/admin", "/api/docs", "/static/openapi.json"]
+        strip_path: false
+        plugins:
+          - name: request-termination
+            config:
+              status_code: 404
+              message: "Not found"
+
+plugins:
+  - name: response-transformer
+    config:
+      add:
+        headers:
+          - "X-Content-Type-Options:nosniff"
+          - "X-Frame-Options:DENY"
+          - "Referrer-Policy:no-referrer"
+          - "X-Kong-Upstream:vuln-bank"
+      remove:
+        headers:
+          - "Server"
+          - "X-Powered-By"
+          - "X-Kong-Version"
+          - "Via"

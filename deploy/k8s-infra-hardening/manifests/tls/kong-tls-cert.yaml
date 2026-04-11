@@ -1,0 +1,18 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: kong-proxy-tls
+  namespace: kong
+spec:
+  secretName: kong-proxy-tls-secret
+  issuerRef:
+    name: lab-ca-issuer
+    kind: ClusterIssuer
+  dnsNames:
+  - vuln-bank.local
+  - "*.vuln-bank.local"
+  - localhost
+  ipAddresses:
+  - 127.0.0.1
+  # Uncomment and set your node IP if testing from an external machine:
+  # - 192.168.x.x

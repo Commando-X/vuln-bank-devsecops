@@ -1,0 +1,72 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vuln-bank
+  namespace: vuln-bank
+  labels:
+    app: vuln-bank
+    tier: application
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: vuln-bank
+  template:
+    metadata:
+      labels:
+        app: vuln-bank
+        tier: application
+    spec:
+      containers:
+      - name: vuln-bank
+        # Build the image locally and import it into your cluster:
+        #   docker build -t vuln-bank:v1.0 .
+        #   docker save vuln-bank:v1.0 | sudo ctr -n k8s.io images import -  # k3s/containerd
+        #   docker save vuln-bank:v1.0 | sudo crio import -                   # CRI-O
+        image: vuln-bank:v1.0
+        imagePullPolicy: Never  # Image is loaded locally — no registry required
+        ports:
+        - containerPort: 5000
+        env:
+        - name: DB_HOST
+          value: postgres-svc.vuln-bank-db.svc.cluster.local
+        - name: DB_PORT
+          value: "5432"
+        - name: DB_NAME
+          value: vulnerable_bank
+        - name: DB_USER
+          valueFrom:
+            secretKeyRef:
+              name: vuln-bank-db-secret
+              key: username
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: vuln-bank-db-secret
+              key: password
+        resources:
+          limits:
+            memory: 256Mi
+            cpu: 500m
+          requests:
+            memory: 128Mi
+            cpu: 100m
+        livenessProbe:
+          httpGet:
+            path: /login
+            port: 5000
+          initialDelaySeconds: 30
+          periodSeconds: 15
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: vuln-bank-svc
+  namespace: vuln-bank
+spec:
+  selector:
+    app: vuln-bank
+  ports:
+  - port: 5000
+    targetPort: 5000
+  type: ClusterIP  # Internal only — all external traffic must go via Kong
