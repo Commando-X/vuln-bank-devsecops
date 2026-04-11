@@ -17,10 +17,6 @@ spec:
         app: vuln-bank
         tier: application
     spec:
-      # The VulnBank app has no reason to call the Kubernetes API.
-      # Disabling the automounted token removes a credential from the
-      # pod that an attacker could use to enumerate the cluster if the
-      # app is compromised via any of its known RCE/SSRF vulnerabilities.
       automountServiceAccountToken: false
       containers:
       - name: vuln-bank
@@ -29,7 +25,7 @@ spec:
         #   docker save vuln-bank:v1.0 | sudo ctr -n k8s.io images import -  # k3s/containerd
         #   docker save vuln-bank:v1.0 | sudo crio import -                   # CRI-O
         image: vuln-bank:v1.0
-        imagePullPolicy: Never  # Image is loaded locally — no registry required
+        imagePullPolicy: Never 
         ports:
         - containerPort: 5000
         env:
@@ -53,8 +49,6 @@ spec:
           limits:
             memory: 256Mi
             cpu: 500m
-            # Prevents a compromised or misbehaving container from
-            # filling the node disk and evicting other pods.
             ephemeral-storage: 512Mi
           requests:
             memory: 128Mi
@@ -78,4 +72,4 @@ spec:
   ports:
   - port: 5000
     targetPort: 5000
-  type: ClusterIP  # Internal only — all external traffic must go via Kong
+  type: ClusterIP 
