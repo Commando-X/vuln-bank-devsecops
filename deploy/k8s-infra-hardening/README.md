@@ -517,8 +517,6 @@ Controls not included here that extend this module naturally:
 - **Kyverno**: admission control policies (deny root pods, require
   resource limits, restrict image registries)
 - **Vault**: dynamic secret injection to replace Kubernetes Secrets
-- **Loki + Grafana**: log aggregation and dashboards for Kong access
-  logs and Falco alerts
 
 ---
 
