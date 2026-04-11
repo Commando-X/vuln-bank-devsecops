@@ -24,9 +24,14 @@ spec:
       labels:
         app: postgres
     spec:
+      # Postgres has no reason to call the Kubernetes API.
+      # Disabling the automounted token removes a credential from the
+      # pod that an attacker could use to enumerate the cluster if the
+      # container is compromised.
+      automountServiceAccountToken: false
       containers:
       - name: postgres
-        image: postgres:15-alpine 
+        image: postgres:15-alpine
         env:
         - name: POSTGRES_DB
           value: vulnerable_bank
@@ -49,9 +54,13 @@ spec:
           limits:
             memory: 512Mi
             cpu: 500m
+            # Prevents a compromised or misbehaving container from
+            # filling the node disk and evicting other pods.
+            ephemeral-storage: 1Gi
           requests:
             memory: 256Mi
             cpu: 100m
+            ephemeral-storage: 256Mi
       volumes:
       - name: postgres-storage
         persistentVolumeClaim:
@@ -68,4 +77,4 @@ spec:
   ports:
   - port: 5432
     targetPort: 5432
-  clusterIP: None 
+  clusterIP: None  # Headless — only reachable via DNS within the cluster
