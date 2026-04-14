@@ -1,0 +1,27 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: vuln-bank
+  labels:
+    name: vuln-bank
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: vuln-bank-db
+  labels:
+    name: vuln-bank-db
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: kong
+  labels:
+    name: kong
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: cert-manager
+  labels:
+    name: cert-manager

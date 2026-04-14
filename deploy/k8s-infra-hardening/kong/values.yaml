@@ -1,0 +1,47 @@
+controller:
+  enabled: false
+
+gateway:
+  image:
+    repository: kong
+    tag: "3.6"
+
+  env:
+    database: "off"
+    declarative_config: /kong_dbless/kong.yaml
+    proxy_access_log: /dev/stdout
+    proxy_error_log: /dev/stderr
+    admin_access_log: /dev/stdout
+    admin_error_log: /dev/stderr
+    log_level: notice
+
+    headers: "off"
+    server_tokens: "off"
+
+  dblessConfig:
+    configMap: kong-config
+
+  ingressController:
+    enabled: false
+
+  proxy:
+    type: NodePort
+    externalTrafficPolicy: Local
+    http:
+      enabled: true
+      nodePort: 30080
+    tls:
+      enabled: true
+      nodePort: 30443
+
+  admin:
+    enabled: true
+    type: ClusterIP
+
+  resources:
+    limits:
+      memory: 256Mi
+      cpu: 500m
+    requests:
+      memory: 128Mi
+      cpu: 100m
